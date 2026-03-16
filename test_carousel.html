@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>카드 디자인 시안</title>
+  <style>
+    :root {
+      --bg: #0a0c10;
+      --card: #13161f;
+      --card2: #1a1d2a;
+      --border: #22263a;
+      --text: #e8eaf0;
+      --muted: #7a7f96;
+      --radius: 18px;
+      --accent: #6c63ff;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: -apple-system, 'Segoe UI', 'Apple SD Gothic Neo', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 1rem;
+    }
+
+    h2 {
+      color: var(--muted);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin: 1.5rem 0 0.75rem;
+    }
+    h2:first-child { margin-top: 0; }
+
+    /* ─── OPTION A: 기존 스타일 (비교용) ─── */
+    .card-old {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      max-width: 380px;
+    }
+    .thumb-wrap {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16/9;
+      overflow: hidden;
+      background: #1a1d2a;
+    }
+    .thumb-wrap img {
+      width: 100%; height: 100%;
+      object-fit: cover; display: block;
+    }
+    .thumb-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.05) 40%, rgba(0,0,0,0.75) 80%, rgba(0,0,0,0.9) 100%);
+    }
+    .thumb-badges {
+      position: absolute; top: 0.7rem; left: 0.7rem;
+      display: flex; gap: 0.4rem; align-items: center;
+    }
+    .cat-badge {
+      font-size: 0.68rem; font-weight: 700;
+      padding: 0.22rem 0.65rem; border-radius: 20px;
+      color: #fff; background: #6c63ff;
+    }
+    .sent-badge {
+      font-size: 0.75rem; padding: 0.18rem 0.55rem;
+      border-radius: 20px; background: rgba(0,0,0,0.5);
+      border: 1px solid rgba(255,255,255,0.15); font-weight: 600;
+    }
+    .thumb-bottom {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      padding: 0.5rem 0.8rem 0.7rem;
+    }
+    .thumb-headline {
+      font-size: 1rem; font-weight: 800; line-height: 1.35; color: #fff;
+      text-shadow: 0 1px 4px rgba(0,0,0,0.8);
+    }
+    .thumb-date { font-size: 0.68rem; color: rgba(255,255,255,0.6); margin-top: 0.2rem; }
+    .card-body-old { padding: 0.9rem 1rem; }
+    .card-summary-old { font-size: 0.83rem; color: #b0b4c8; line-height: 1.65; margin-bottom: 0.65rem; }
+    .card-points-old { list-style: none; display: flex; flex-direction: column; gap: 0.45rem; }
+    .card-points-old li {
+      display: flex; gap: 0.5rem;
+      font-size: 0.82rem; line-height: 1.4; color: var(--text);
+    }
+    .card-points-old li .icon {
+      flex-shrink: 0; width: 18px; height: 18px; border-radius: 50%;
+      background: rgba(108,99,255,0.2); border: 1px solid rgba(108,99,255,0.4);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.6rem; color: #6c63ff; font-weight: 900; margin-top: 0.1rem;
+    }
+
+    /* ─── OPTION B: 캐러셀 스타일 ─── */
+    .card-carousel {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      max-width: 380px;
+    }
+
+    /* 썸네일 (공통) */
+    .thumb-sm {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16/9;
+      overflow: hidden;
+      background: #1a1d2a;
+    }
+    .thumb-sm img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .thumb-sm .overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.6) 70%, rgba(0,0,0,0.92) 100%);
+    }
+    .thumb-sm .badges {
+      position: absolute; top: 0.7rem; left: 0.7rem;
+      display: flex; gap: 0.4rem; align-items: center;
+    }
+    .thumb-sm .cat-b {
+      font-size: 0.65rem; font-weight: 700;
+      padding: 0.2rem 0.6rem; border-radius: 20px;
+      color: #fff; background: #6c63ff;
+    }
+    .thumb-sm .sent-b {
+      font-size: 0.72rem; padding: 0.18rem 0.5rem;
+      border-radius: 20px; background: rgba(0,0,0,0.55);
+      border: 1px solid rgba(255,255,255,0.15);
+    }
+    .thumb-sm .bottom {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      padding: 0.4rem 0.8rem 0.65rem;
+    }
+    .thumb-sm .hl {
+      font-size: 0.95rem; font-weight: 800; line-height: 1.3;
+      color: #fff; text-shadow: 0 1px 4px rgba(0,0,0,0.9);
+    }
+    .thumb-sm .dt { font-size: 0.65rem; color: rgba(255,255,255,0.55); margin-top: 0.15rem; }
+
+    /* 슬라이드 래퍼 */
+    .slides-track-outer {
+      position: relative;
+      overflow: hidden;
+    }
+    .slides-track {
+      display: flex;
+      transition: transform 0.32s cubic-bezier(0.4,0,0.2,1);
+    }
+    .slide {
+      min-width: 100%;
+      padding: 1rem 1.1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    /* 슬라이드 헤더 */
+    .slide-header {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+    .slide-icon {
+      width: 36px; height: 36px;
+      border-radius: 10px;
+      background: rgba(108,99,255,0.15);
+      border: 1px solid rgba(108,99,255,0.3);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+    .slide-title {
+      font-size: 0.92rem; font-weight: 800;
+      line-height: 1.3; color: var(--text);
+    }
+    .slide-num {
+      margin-left: auto;
+      font-size: 0.65rem; color: var(--muted);
+      flex-shrink: 0;
+    }
+
+    /* 슬라이드 본문 */
+    .slide-content {
+      font-size: 0.84rem;
+      line-height: 1.72;
+      color: #b8bcd4;
+    }
+
+    /* 하이라이트 박스 (일부 슬라이드에만) */
+    .slide-highlight {
+      background: rgba(108,99,255,0.08);
+      border: 1px solid rgba(108,99,255,0.2);
+      border-left: 3px solid var(--accent);
+      border-radius: 8px;
+      padding: 0.6rem 0.75rem;
+      font-size: 0.8rem;
+      color: #c4c0ff;
+      line-height: 1.55;
+    }
+
+    /* 도트 네비 + 화살표 */
+    .slide-nav {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.5rem 0.8rem 0.8rem;
+    }
+    .dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--border);
+      transition: all .2s;
+      cursor: pointer;
+    }
+    .dot.active {
+      background: var(--accent);
+      width: 18px;
+      border-radius: 3px;
+    }
+    .nav-btn {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: var(--card2);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      font-size: 0.75rem;
+      transition: all .18s;
+      flex-shrink: 0;
+    }
+    .nav-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .nav-btn:disabled { opacity: 0.3; cursor: default; }
+    .spacer { flex: 1; }
+
+    /* CTA */
+    .card-cta {
+      display: flex; align-items: center; justify-content: center; gap: 0.4rem;
+      padding: 0.65rem;
+      border-top: 1px solid var(--border);
+      font-size: 0.8rem; font-weight: 600; color: var(--muted);
+      text-decoration: none;
+      transition: background .18s, color .18s;
+    }
+    .card-cta:hover { background: rgba(108,99,255,0.1); color: #6c63ff; }
+    .play-icon {
+      width: 22px; height: 22px; border-radius: 50%;
+      background: rgba(255,0,0,0.15); border: 1px solid rgba(255,0,0,0.3);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.6rem; color: #ff4444;
+    }
+
+    /* 태그 (마지막 슬라이드) */
+    .slide-tags {
+      display: flex; flex-wrap: wrap; gap: 0.35rem;
+      padding-top: 0.3rem;
+    }
+    .stock-tag {
+      font-size: 0.72rem; font-weight: 700;
+      padding: 0.22rem 0.6rem; border-radius: 8px;
+      background: rgba(78,205,196,0.12);
+      border: 1px solid rgba(78,205,196,0.35);
+      color: #4ecdc4;
+    }
+    .tag {
+      font-size: 0.7rem; padding: 0.2rem 0.55rem;
+      border-radius: 8px; background: var(--card2);
+      border: 1px solid var(--border); color: var(--muted);
+    }
+
+    /* ─── OPTION C: Full-width 슬라이드 (더 큰 텍스트) ─── */
+    .card-wide {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      max-width: 420px;
+    }
+    .wide-slide {
+      min-width: 100%;
+      min-height: 220px;
+      padding: 1.2rem 1.2rem 1rem;
+      display: flex; flex-direction: column; gap: 0.7rem;
+    }
+    .wide-slide-header {
+      display: flex; align-items: flex-start; gap: 0.7rem;
+    }
+    .wide-icon {
+      font-size: 1.6rem; line-height: 1; flex-shrink: 0; margin-top: 0.1rem;
+    }
+    .wide-title {
+      font-size: 1.05rem; font-weight: 800; line-height: 1.3;
+    }
+    .wide-content {
+      font-size: 0.88rem; line-height: 1.75; color: #b8bcd4;
+    }
+    .wide-highlight {
+      background: rgba(108,99,255,0.08);
+      border: 1px solid rgba(108,99,255,0.2);
+      border-left: 3px solid var(--accent);
+      border-radius: 8px;
+      padding: 0.65rem 0.8rem;
+      font-size: 0.82rem; color: #c4c0ff; line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+
+<h2>옵션 A — 기존 스타일 (현재)</h2>
+<div class="card-old">
+  <div class="thumb-wrap">
+    <img src="https://i.ytimg.com/vi/KwkC8qksUsM/maxresdefault.jpg"
+         onerror="this.src='https://i.ytimg.com/vi/KwkC8qksUsM/hqdefault.jpg'" alt="">
+    <div class="thumb-overlay"></div>
+    <div class="thumb-badges">
+      <span class="cat-badge">국내주식</span>
+      <span class="sent-badge" style="color:#22c55e">📈</span>
+    </div>
+    <div class="thumb-bottom">
+      <div class="thumb-headline">카카오, AI 시대의 진짜 해자는 데이터</div>
+      <div class="thumb-date">2024.10.08</div>
+    </div>
+  </div>
+  <div class="card-body-old">
+    <div class="card-summary-old">카카오는 4,700만 MAU 기반의 방대한 행동 데이터가 진짜 해자다. 네이버와 달리 서비스 내 AI 내재화 전략을 선택했으며, 지금의 저평가는 AI 잠재력이 반영되지 않은 결과다.</div>
+    <ul class="card-points-old">
+      <li><span class="icon">✦</span><span>카카오톡 4,700만 MAU 기반 행동 데이터가 경쟁사 대비 압도적 해자</span></li>
+      <li><span class="icon">✦</span><span>네이버 노출형 vs 카카오 내재화: 전혀 다른 AI 전략 선택</span></li>
+      <li><span class="icon">✦</span><span>현 주가 5만원대, 52주 최고가 대비 30% 이상 할인된 저평가 구간</span></li>
+    </ul>
+  </div>
+</div>
+
+<h2>옵션 B — 캐러셀 카드 (슬라이드 내비게이션)</h2>
+<div class="card-carousel" id="card-b">
+  <div class="thumb-sm">
+    <img src="https://i.ytimg.com/vi/KwkC8qksUsM/maxresdefault.jpg"
+         onerror="this.src='https://i.ytimg.com/vi/KwkC8qksUsM/hqdefault.jpg'" alt="">
+    <div class="overlay"></div>
+    <div class="badges">
+      <span class="cat-b">국내주식</span>
+      <span class="sent-b" style="color:#22c55e">📈 강세</span>
+    </div>
+    <div class="bottom">
+      <div class="hl">카카오, AI 시대의 진짜 해자는 데이터</div>
+      <div class="dt">2024.10.08</div>
+    </div>
+  </div>
+
+  <div class="slides-track-outer">
+    <div class="slides-track" id="track-b">
+
+      <!-- 슬라이드 1: 현황 -->
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-icon">📉</div>
+          <div class="slide-title">지금 왜 카카오인가</div>
+          <div class="slide-num">1 / 5</div>
+        </div>
+        <div class="slide-content">
+          중동 전쟁 여파로 코스피가 흔들리며 카카오도 약 20% 급락했습니다. 52주 최고가 71,000원에서 50,000원 초반까지 밀렸고, 5년 전 대비로는 사실상 반토막 상태입니다.
+        </div>
+        <div class="slide-highlight">
+          사법 리스크 · AI 전략 불확실성 · 자회사 부진까지 악재가 겹친 상황. 그러나 이 순간에도 4,700만 명은 카카오톡으로 메시지를 보내고, 택시를 부르고, 송금을 합니다.
+        </div>
+      </div>
+
+      <!-- 슬라이드 2: 해자 -->
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-icon">🔒</div>
+          <div class="slide-title">데이터가 진짜 해자</div>
+          <div class="slide-num">2 / 5</div>
+        </div>
+        <div class="slide-content">
+          카카오의 진짜 경쟁력은 광고 매출이 아닌 <strong style="color:#c4c0ff">4,700만 명의 일상 행동 데이터</strong>입니다. 대화 패턴, 이동 경로, 소비 습관 — 네이버가 검색으로 파악하는 데이터보다 훨씬 개인의 맥락을 담고 있습니다.
+        </div>
+        <div class="slide-highlight">
+          이 데이터는 국내에서 대체 불가합니다. 사용자를 카카오톡에서 다른 메신저로 이동시키려면 그 사람의 모든 인맥이 동시에 이동해야 합니다. 이것이 네트워크 효과라는 해자입니다.
+        </div>
+      </div>
+
+      <!-- 슬라이드 3: AI 전략 비교 -->
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-icon">🤖</div>
+          <div class="slide-title">네이버 vs 카카오 AI 전략</div>
+          <div class="slide-num">3 / 5</div>
+        </div>
+        <div class="slide-content">
+          네이버는 AI를 별도 서비스로 노출(HyperCLOVA X, 큐:)하는 반면, 카카오는 서비스 안에 AI를 녹여 넣는 내재화 전략을 선택했습니다.
+        </div>
+        <div class="slide-highlight">
+          카카오톡 대화 요약, 감정 분석, 광고 초개인화 — 사용자는 AI를 쓴다는 느낌 없이 더 나은 경험을 하게 됩니다. 이는 장기적으로 더 강한 락인 효과를 만들어냅니다.
+        </div>
+      </div>
+
+      <!-- 슬라이드 4: 리스크 -->
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-icon">⚠️</div>
+          <div class="slide-title">리스크 점검</div>
+          <div class="slide-num">4 / 5</div>
+        </div>
+        <div class="slide-content">
+          카카오에는 분명한 리스크가 존재합니다. 창업자의 사법 리스크로 인한 기업 지배구조 불확실성, 카카오엔터·SM엔터 등 자회사들의 실적 부진, 그리고 과거 문어발 확장에 대한 시장의 불신이 여전합니다.
+        </div>
+        <div class="slide-highlight">
+          단, 이 리스크들은 이미 주가에 반영됐을 가능성이 높습니다. PBR 1배 미만의 극단적 저평가는 이 악재들이 과잉 반영된 신호일 수 있습니다.
+        </div>
+      </div>
+
+      <!-- 슬라이드 5: 투자 시사점 -->
+      <div class="slide">
+        <div class="slide-header">
+          <div class="slide-icon">💡</div>
+          <div class="slide-title">투자 시사점</div>
+          <div class="slide-num">5 / 5</div>
+        </div>
+        <div class="slide-content">
+          카카오는 지금 AI 잠재력이 주가에 전혀 반영되지 않은 상태로 거래되고 있습니다. 단기 모멘텀보다는 3~5년 관점에서 데이터 자산의 재평가를 노리는 투자 시나리오가 유효합니다.
+        </div>
+        <div class="slide-tags">
+          <span class="stock-tag">카카오</span>
+          <span class="tag">#AI내재화</span>
+          <span class="tag">#데이터해자</span>
+          <span class="tag">#저평가</span>
+        </div>
+      </div>
+
+    </div><!-- /slides-track -->
+  </div><!-- /slides-track-outer -->
+
+  <div class="slide-nav" id="nav-b">
+    <button class="nav-btn" id="prev-b" onclick="move('b',-1)">‹</button>
+    <div class="spacer" style="display:flex;gap:0.4rem;align-items:center;justify-content:center">
+      <div class="dot active" onclick="goto('b',0)"></div>
+      <div class="dot" onclick="goto('b',1)"></div>
+      <div class="dot" onclick="goto('b',2)"></div>
+      <div class="dot" onclick="goto('b',3)"></div>
+      <div class="dot" onclick="goto('b',4)"></div>
+    </div>
+    <button class="nav-btn" id="next-b" onclick="move('b',1)">›</button>
+  </div>
+
+  <a class="card-cta" href="https://youtube.com/watch?v=KwkC8qksUsM" target="_blank">
+    <span class="play-icon">▶</span> 원본 영상 보기
+  </a>
+</div>
+
+
+<h2>옵션 C — 와이드 슬라이드 (텍스트 중심, 더 크게)</h2>
+<div class="card-wide" id="card-c">
+  <div class="thumb-sm" style="aspect-ratio:21/9">
+    <img src="https://i.ytimg.com/vi/KwkC8qksUsM/maxresdefault.jpg"
+         onerror="this.src='https://i.ytimg.com/vi/KwkC8qksUsM/hqdefault.jpg'" alt=""
+         style="width:100%;height:100%;object-fit:cover">
+    <div class="overlay"></div>
+    <div class="badges">
+      <span class="cat-b">국내주식</span>
+      <span class="sent-b" style="color:#22c55e">📈 강세</span>
+    </div>
+    <div class="bottom">
+      <div class="hl" style="font-size:1rem">카카오, AI 시대의 진짜 해자는 데이터</div>
+      <div class="dt">2024.10.08</div>
+    </div>
+  </div>
+
+  <div class="slides-track-outer">
+    <div class="slides-track" id="track-c">
+
+      <div class="wide-slide">
+        <div class="wide-slide-header">
+          <div class="wide-icon">📉</div>
+          <div class="wide-title">지금 왜 카카오인가</div>
+        </div>
+        <div class="wide-content">중동 전쟁 여파로 코스피가 흔들리며 카카오도 약 20% 급락했습니다. 52주 최고가 71,000원에서 50,000원 초반까지 밀렸고, 5년 전 대비로는 사실상 반토막 상태입니다. 사법 리스크 · AI 전략 불확실성 · 자회사 부진까지 악재가 겹쳤지만, 이 순간에도 4,700만 명은 카카오톡을 씁니다.</div>
+        <div class="wide-highlight">그 사실 하나가 이 회사의 가치를 설명하는 가장 강력한 한 줄입니다.</div>
+      </div>
+
+      <div class="wide-slide">
+        <div class="wide-slide-header">
+          <div class="wide-icon">🔒</div>
+          <div class="wide-title">데이터가 진짜 해자</div>
+        </div>
+        <div class="wide-content">카카오의 진짜 경쟁력은 4,700만 명의 일상 행동 데이터입니다. 대화 패턴, 이동 경로, 소비 습관 — 네이버가 검색으로 파악하는 것보다 훨씬 개인의 맥락을 담고 있습니다. 이 데이터는 국내에서 대체 불가합니다.</div>
+        <div class="wide-highlight">카카오톡 사용자를 이동시키려면 그 사람의 모든 인맥이 동시에 이동해야 합니다. 이것이 네트워크 효과 해자입니다.</div>
+      </div>
+
+      <div class="wide-slide">
+        <div class="wide-slide-header">
+          <div class="wide-icon">🤖</div>
+          <div class="wide-title">AI 내재화 전략</div>
+        </div>
+        <div class="wide-content">네이버가 AI를 별도 서비스로 노출하는 반면, 카카오는 서비스 안에 AI를 녹여 넣는 내재화 전략을 선택했습니다. 사용자는 AI를 쓴다는 느낌 없이 더 나은 경험을 하게 됩니다.</div>
+        <div class="wide-highlight">대화 요약 · 감정 분석 · 광고 초개인화 — 장기적으로 더 강한 락인 효과를 만들어냅니다.</div>
+      </div>
+
+      <div class="wide-slide">
+        <div class="wide-slide-header">
+          <div class="wide-icon">💡</div>
+          <div class="wide-title">투자 시사점</div>
+        </div>
+        <div class="wide-content">카카오는 지금 AI 잠재력이 주가에 전혀 반영되지 않은 상태로 거래되고 있습니다. PBR 1배 미만의 극단적 저평가는 악재가 과잉 반영된 신호일 수 있습니다.</div>
+        <div class="slide-tags">
+          <span class="stock-tag">카카오</span>
+          <span class="tag">#AI내재화</span>
+          <span class="tag">#데이터해자</span>
+          <span class="tag">#저평가</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="slide-nav" id="nav-c">
+    <button class="nav-btn" id="prev-c" onclick="move('c',-1)">‹</button>
+    <div class="spacer" style="display:flex;gap:0.4rem;align-items:center;justify-content:center">
+      <div class="dot active" onclick="goto('c',0)"></div>
+      <div class="dot" onclick="goto('c',1)"></div>
+      <div class="dot" onclick="goto('c',2)"></div>
+      <div class="dot" onclick="goto('c',3)"></div>
+    </div>
+    <button class="nav-btn" id="next-c" onclick="move('c',1)">›</button>
+  </div>
+
+  <a class="card-cta" href="https://youtube.com/watch?v=KwkC8qksUsM" target="_blank">
+    <span class="play-icon">▶</span> 원본 영상 보기
+  </a>
+</div>
+
+<div style="height:2rem"></div>
+
+<script>
+  const state = {
+    b: { idx: 0, total: 5 },
+    c: { idx: 0, total: 4 },
+  };
+
+  function updateCard(id) {
+    const { idx, total } = state[id];
+    const track = document.getElementById('track-' + id);
+    track.style.transform = `translateX(-${idx * 100}%)`;
+
+    const dots = document.querySelectorAll(`#nav-${id} .dot`);
+    dots.forEach((d, i) => d.classList.toggle('active', i === idx));
+
+    document.getElementById('prev-' + id).disabled = idx === 0;
+    document.getElementById('next-' + id).disabled = idx === total - 1;
+  }
+
+  function move(id, dir) {
+    const s = state[id];
+    s.idx = Math.max(0, Math.min(s.total - 1, s.idx + dir));
+    updateCard(id);
+  }
+
+  function goto(id, i) {
+    state[id].idx = i;
+    updateCard(id);
+  }
+
+  // 터치 스와이프
+  ['b','c'].forEach(id => {
+    const el = document.getElementById('card-' + id);
+    let startX = 0;
+    el.addEventListener('touchstart', e => { startX = e.touches[0].clientX; }, { passive: true });
+    el.addEventListener('touchend', e => {
+      const dx = e.changedTouches[0].clientX - startX;
+      if (Math.abs(dx) > 40) move(id, dx < 0 ? 1 : -1);
+    }, { passive: true });
+  });
+
+  // 초기 상태
+  updateCard('b');
+  updateCard('c');
+</script>
+</body>
+</html>
