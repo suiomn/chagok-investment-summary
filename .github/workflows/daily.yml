@@ -15,6 +15,12 @@ jobs:
         shell: bash
 
     steps:
+      - name: Add Git bash to PATH
+        shell: powershell
+        run: |
+          "C:\Program Files\Git\bin" | Out-File -Append -Encoding utf8 $env:GITHUB_PATH
+          "C:\Program Files\Git\usr\bin" | Out-File -Append -Encoding utf8 $env:GITHUB_PATH
+
       - name: Checkout repo
         uses: actions/checkout@v4
 
