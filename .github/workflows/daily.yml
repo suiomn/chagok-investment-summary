@@ -26,7 +26,9 @@ jobs:
       - name: Run daily update
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-        run: python src/daily_run_ci.py
+        run: |
+          echo "${{ secrets.YOUTUBE_COOKIES }}" > /tmp/yt-cookies.txt
+          python src/daily_run_ci.py
 
       - name: Commit and push changes
         run: |

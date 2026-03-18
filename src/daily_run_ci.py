@@ -64,12 +64,12 @@ def find_new_videos(fetched: list) -> list:
 
 
 def _ytdlp_base_args():
-    """CI 환경(GitHub Actions)에서도 동작하도록 player client 및 JS 런타임 지정"""
-    return [
-        'yt-dlp',
-        '--extractor-args', 'youtube:player_client=android,ios,web',
-        '--js-runtimes', 'nodejs',
-    ]
+    """CI 환경(GitHub Actions)에서도 동작하도록 player client 및 쿠키 지정"""
+    args = ['yt-dlp', '--extractor-args', 'youtube:player_client=android,ios,web']
+    cookies = Path('/tmp/yt-cookies.txt')
+    if cookies.exists() and cookies.stat().st_size > 100:
+        args += ['--cookies', str(cookies)]
+    return args
 
 
 def download_subs(video_ids: list) -> list:
