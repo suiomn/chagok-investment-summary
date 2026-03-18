@@ -87,12 +87,14 @@ def download_subs_ytdlp(video_ids: list) -> list:
 
 
 def download_subs_api(video_ids: list) -> list:
-    """youtube-transcript-api 폴백 (쿠키 불필요)"""
+    """youtube-transcript-api 폴백 (쿠키 지원)"""
     try:
         from youtube_transcript_api import YouTubeTranscriptApi
     except ImportError:
         return []
-    api = YouTubeTranscriptApi()
+    cookies = Path('/tmp/yt-cookies.txt')
+    cookies_arg = str(cookies) if cookies.exists() and cookies.stat().st_size > 100 else None
+    api = YouTubeTranscriptApi(cookies=cookies_arg)
     saved = []
     for vid in video_ids:
         try:
