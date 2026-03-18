@@ -21,7 +21,7 @@ jobs:
           python-version: '3.11'
 
       - name: Install dependencies
-        run: pip install anthropic yt-dlp
+        run: pip install anthropic yt-dlp youtube-transcript-api
 
       - name: Run daily update
         env:

@@ -72,10 +72,8 @@ def _ytdlp_base_args():
     return args
 
 
-def download_subs(video_ids: list) -> list:
-    if not video_ids:
-        return []
-    log(f"자막 다운로드 중 ({len(video_ids)}개)...")
+def download_subs_ytdlp(video_ids: list) -> list:
+    """yt-dlp로 자막 다운로드 (쿠키 있을 때 우선 사용)"""
     urls = [f"https://www.youtube.com/watch?v={vid}" for vid in video_ids]
     cmd = _ytdlp_base_args() + [
         '--write-auto-sub', '--write-subs', '--sub-lang', 'ko', '--sub-format', 'srt',
@@ -84,9 +82,41 @@ def download_subs(video_ids: list) -> list:
     ] + urls
     result = subprocess.run(cmd, capture_output=True, timeout=300)
     if result.returncode != 0:
-        log(f"  [WARN] yt-dlp 오류: {result.stderr.decode('utf-8', errors='replace')[-300:]}")
-    downloaded = [vid for vid in video_ids
-                  if (SUBS_DIR / f"{vid}.ko.srt").exists()]
+        log(f"  [WARN] yt-dlp: {result.stderr.decode('utf-8', errors='replace')[-200:]}")
+    return [vid for vid in video_ids if (SUBS_DIR / f"{vid}.ko.srt").exists()]
+
+
+def download_subs_api(video_ids: list) -> list:
+    """youtube-transcript-api 폴백 (쿠키 불필요)"""
+    try:
+        from youtube_transcript_api import YouTubeTranscriptApi
+    except ImportError:
+        return []
+    saved = []
+    for vid in video_ids:
+        try:
+            parts = YouTubeTranscriptApi.get_transcript(vid, languages=['ko', 'en'])
+            text = '\n'.join(p['text'] for p in parts)
+            srt_path = SUBS_DIR / f"{vid}.ko.srt"
+            srt_path.write_text(text, encoding='utf-8')
+            saved.append(vid)
+        except Exception as e:
+            log(f"  [WARN] transcript-api {vid}: {e}")
+    return saved
+
+
+def download_subs(video_ids: list) -> list:
+    if not video_ids:
+        return []
+    log(f"자막 다운로드 중 ({len(video_ids)}개)...")
+    downloaded = download_subs_ytdlp(video_ids)
+    log(f"  → yt-dlp: {len(downloaded)}개")
+
+    remaining = [v for v in video_ids if v not in downloaded]
+    if remaining:
+        log(f"  → transcript-api 폴백 ({len(remaining)}개)...")
+        downloaded += download_subs_api(remaining)
+
     log(f"  → 자막 다운로드 완료: {len(downloaded)}개")
     return downloaded
 
