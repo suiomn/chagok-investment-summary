@@ -63,11 +63,24 @@ def find_new_videos(fetched: list) -> list:
     return new_vids
 
 
+def _cookies_path() -> Path | None:
+    """쿠키 파일 경로 탐색 (Windows RUNNER_TEMP 우선, 폴백 /tmp)"""
+    candidates = []
+    runner_temp = os.environ.get('RUNNER_TEMP', '')
+    if runner_temp:
+        candidates.append(Path(runner_temp) / 'yt-cookies.txt')
+    candidates.append(Path('/tmp/yt-cookies.txt'))
+    for p in candidates:
+        if p.exists() and p.stat().st_size > 100:
+            return p
+    return None
+
+
 def _ytdlp_base_args():
     """CI 환경(GitHub Actions)에서도 동작하도록 player client 및 쿠키 지정"""
-    args = ['yt-dlp', '--extractor-args', 'youtube:player_client=android,ios,web']
-    cookies = Path('/tmp/yt-cookies.txt')
-    if cookies.exists() and cookies.stat().st_size > 100:
+    args = [sys.executable, '-m', 'yt_dlp', '--extractor-args', 'youtube:player_client=android,ios,web']
+    cookies = _cookies_path()
+    if cookies:
         args += ['--cookies', str(cookies)]
     return args
 
@@ -107,8 +120,8 @@ def download_subs_api(video_ids: list) -> list:
         return []
 
     session = requests.Session()
-    cookies_path = Path('/tmp/yt-cookies.txt')
-    if cookies_path.exists() and cookies_path.stat().st_size > 100:
+    cookies_path = _cookies_path()
+    if cookies_path and cookies_path.exists() and cookies_path.stat().st_size > 100:
         try:
             cj = http.cookiejar.MozillaCookieJar(str(cookies_path))
             cj.load(ignore_discard=True, ignore_expires=True)
