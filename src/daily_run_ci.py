@@ -99,18 +99,31 @@ def download_subs_ytdlp(video_ids: list) -> list:
 
 
 def download_subs_api(video_ids: list) -> list:
-    """youtube-transcript-api 폴백 (쿠키 지원, v0.6.x API)"""
+    """youtube-transcript-api 폴백 (쿠키 지원, v1.2.x API)"""
     try:
         from youtube_transcript_api import YouTubeTranscriptApi
+        import requests, http.cookiejar
     except ImportError:
         return []
-    cookies = Path('/tmp/yt-cookies.txt')
-    cookies_arg = str(cookies) if cookies.exists() and cookies.stat().st_size > 100 else None
+
+    session = requests.Session()
+    cookies_path = Path('/tmp/yt-cookies.txt')
+    if cookies_path.exists() and cookies_path.stat().st_size > 100:
+        try:
+            cj = http.cookiejar.MozillaCookieJar(str(cookies_path))
+            cj.load(ignore_discard=True, ignore_expires=True)
+            session.cookies = cj
+        except Exception as e:
+            log(f"  [WARN] 쿠키 로드 실패: {e}")
+
+    api = YouTubeTranscriptApi(http_client=session)
     saved = []
     for vid in video_ids:
         try:
-            parts = YouTubeTranscriptApi.get_transcript(vid, languages=['ko', 'en'], cookies=cookies_arg)
-            text = '\n'.join(s['text'] for s in parts)
+            tl = api.list(vid)
+            transcript = tl.find_transcript(['ko', 'en'])
+            parts = transcript.fetch()
+            text = '\n'.join(s.text for s in parts)
             srt_path = SUBS_DIR / f"{vid}.ko.srt"
             srt_path.write_text(text, encoding='utf-8')
             saved.append(vid)
