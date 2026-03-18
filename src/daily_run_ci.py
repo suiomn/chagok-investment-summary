@@ -73,17 +73,29 @@ def _ytdlp_base_args():
 
 
 def download_subs_ytdlp(video_ids: list) -> list:
-    """yt-dlp로 자막 다운로드 (쿠키 있을 때 우선 사용)"""
+    """yt-dlp로 자막 다운로드 (언어 제한 없이 모든 자막 시도)"""
     urls = [f"https://www.youtube.com/watch?v={vid}" for vid in video_ids]
     cmd = _ytdlp_base_args() + [
-        '--write-auto-sub', '--write-subs', '--sub-lang', 'ko', '--sub-format', 'srt',
-        '--skip-download', '--quiet',
+        '--write-auto-sub', '--write-subs', '--all-subs',
+        '--sub-format', 'srt/best',
+        '--skip-download',
         '-o', f'{SUBS_DIR}/%(id)s',
     ] + urls
     result = subprocess.run(cmd, capture_output=True, timeout=300)
+    stderr = result.stderr.decode('utf-8', errors='replace')
     if result.returncode != 0:
-        log(f"  [WARN] yt-dlp: {result.stderr.decode('utf-8', errors='replace')[-200:]}")
-    return [vid for vid in video_ids if (SUBS_DIR / f"{vid}.ko.srt").exists()]
+        log(f"  [WARN] yt-dlp: {stderr[-300:]}")
+
+    # 다운로드된 파일 확인 (ko, ko-KR, en 등 언어 불문)
+    found = []
+    for vid in video_ids:
+        srt_files = sorted(SUBS_DIR.glob(f"{vid}*.srt"))
+        if srt_files:
+            target = SUBS_DIR / f"{vid}.ko.srt"
+            if not target.exists():
+                srt_files[0].rename(target)
+            found.append(vid)
+    return found
 
 
 def download_subs_api(video_ids: list) -> list:
