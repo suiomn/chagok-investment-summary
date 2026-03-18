@@ -92,11 +92,14 @@ def download_subs_api(video_ids: list) -> list:
         from youtube_transcript_api import YouTubeTranscriptApi
     except ImportError:
         return []
+    api = YouTubeTranscriptApi()
     saved = []
     for vid in video_ids:
         try:
-            parts = YouTubeTranscriptApi.get_transcript(vid, languages=['ko', 'en'])
-            text = '\n'.join(p['text'] for p in parts)
+            transcript_list = api.list(vid)
+            transcript = transcript_list.find_transcript(['ko', 'en'])
+            parts = transcript.fetch()
+            text = '\n'.join(s.text for s in parts)
             srt_path = SUBS_DIR / f"{vid}.ko.srt"
             srt_path.write_text(text, encoding='utf-8')
             saved.append(vid)
