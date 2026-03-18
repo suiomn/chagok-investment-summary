@@ -27,9 +27,11 @@ def log(msg: str):
 def fetch_latest_videos(limit: int = 50) -> list:
     log("채널 동영상 목록 가져오는 중...")
     result = subprocess.run(
-        ['yt-dlp', '--flat-playlist', '--dump-json',
-         '--extractor-args', 'youtubetab:approximate_date',
-         CHANNEL_URL],
+        _ytdlp_base_args() + [
+            '--flat-playlist', '--dump-json',
+            '--extractor-args', 'youtubetab:approximate_date',
+            CHANNEL_URL,
+        ],
         capture_output=True, timeout=120
     )
     lines = result.stdout.decode('utf-8', errors='replace').strip().split('\n')
@@ -61,16 +63,28 @@ def find_new_videos(fetched: list) -> list:
     return new_vids
 
 
+def _ytdlp_base_args():
+    """CI 환경(GitHub Actions)에서도 동작하도록 player client 및 JS 런타임 지정"""
+    return [
+        'yt-dlp',
+        '--extractor-args', 'youtube:player_client=android,ios,web',
+        '--js-runtimes', 'nodejs',
+    ]
+
+
 def download_subs(video_ids: list) -> list:
     if not video_ids:
         return []
     log(f"자막 다운로드 중 ({len(video_ids)}개)...")
     urls = [f"https://www.youtube.com/watch?v={vid}" for vid in video_ids]
-    cmd = ['yt-dlp',
-           '--write-auto-sub', '--sub-lang', 'ko', '--sub-format', 'srt',
-           '--skip-download', '--quiet',
-           '-o', f'{SUBS_DIR}/%(id)s'] + urls
-    subprocess.run(cmd, capture_output=True, timeout=300)
+    cmd = _ytdlp_base_args() + [
+        '--write-auto-sub', '--write-subs', '--sub-lang', 'ko', '--sub-format', 'srt',
+        '--skip-download', '--quiet',
+        '-o', f'{SUBS_DIR}/%(id)s',
+    ] + urls
+    result = subprocess.run(cmd, capture_output=True, timeout=300)
+    if result.returncode != 0:
+        log(f"  [WARN] yt-dlp 오류: {result.stderr.decode('utf-8', errors='replace')[-300:]}")
     downloaded = [vid for vid in video_ids
                   if (SUBS_DIR / f"{vid}.ko.srt").exists()]
     log(f"  → 자막 다운로드 완료: {len(downloaded)}개")

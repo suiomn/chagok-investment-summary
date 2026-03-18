@@ -51,6 +51,8 @@ def summarize_video(video_id: str, title: str, verbose: bool = True) -> dict | N
     """단일 동영상 자막 요약"""
     srt_path = SUBS_DIR / f"{video_id}.ko.srt"
     if not srt_path.exists():
+        srt_path = SUBS_DIR / f"{video_id}.en.srt"
+    if not srt_path.exists():
         if verbose:
             print(f"  [SKIP] 자막 없음: {video_id}")
         return None
