@@ -23,6 +23,8 @@ jobs:
 
       - name: Checkout repo
         uses: actions/checkout@v4
+        with:
+          clean: false   # tmp_subs/ 캐시 보존
 
       - name: Install dependencies
         run: pip install anthropic yt-dlp youtube-transcript-api

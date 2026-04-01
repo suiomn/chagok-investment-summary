@@ -95,7 +95,8 @@ def download_subs_ytdlp(video_ids: list) -> list:
     """yt-dlp로 자막 다운로드 (언어 제한 없이 모든 자막 시도)"""
     urls = [f"https://www.youtube.com/watch?v={vid}" for vid in video_ids]
     cmd = _ytdlp_base_args() + [
-        '--write-auto-sub', '--write-subs', '--all-subs',
+        '--write-auto-sub', '--write-subs',
+        '--sub-lang', 'ko,ko-KR',
         '--sub-format', 'srt/best',
         '--skip-download',
         '-o', f'{SUBS_DIR}/%(id)s',
