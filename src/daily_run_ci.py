@@ -55,12 +55,18 @@ def fetch_latest_videos(limit: int = 50) -> list:
     return videos
 
 
-def find_new_videos(fetched: list) -> list:
+def find_new_videos(fetched: list, max_per_run: int = 5) -> list:
     summaries = load_summaries()
     known_ids = set(summaries.keys())
     new_vids = [v for v in fetched if v['id'] not in known_ids]
-    log(f"  → 신규 동영상: {len(new_vids)}개")
-    return new_vids
+    log(f"  → 신규 동영상 전체: {len(new_vids)}개")
+    # 최신순으로 정렬 후 1회 처리 최대치 제한
+    new_vids_sorted = sorted(
+        [v for v in new_vids if v.get('timestamp')],
+        key=lambda x: x['timestamp'], reverse=True
+    )[:max_per_run]
+    log(f"  → 이번 실행 처리: {len(new_vids_sorted)}개")
+    return new_vids_sorted
 
 
 def _cookies_path() -> Path | None:
@@ -94,10 +100,13 @@ def download_subs_ytdlp(video_ids: list) -> list:
         '--skip-download',
         '-o', f'{SUBS_DIR}/%(id)s',
     ] + urls
-    result = subprocess.run(cmd, capture_output=True, timeout=300)
-    stderr = result.stderr.decode('utf-8', errors='replace')
-    if result.returncode != 0:
-        log(f"  [WARN] yt-dlp: {stderr[-300:]}")
+    try:
+        result = subprocess.run(cmd, capture_output=True, timeout=300)
+        stderr = result.stderr.decode('utf-8', errors='replace')
+        if result.returncode != 0:
+            log(f"  [WARN] yt-dlp: {stderr[-300:]}")
+    except subprocess.TimeoutExpired:
+        log("  [WARN] yt-dlp 타임아웃 (300s) - 부분적으로 완료된 파일 확인")
 
     # 다운로드된 파일 확인 (ko, ko-KR, en 등 언어 불문)
     found = []
