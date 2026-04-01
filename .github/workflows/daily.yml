@@ -27,7 +27,7 @@ jobs:
           clean: false   # tmp_subs/ 캐시 보존
 
       - name: Install dependencies
-        run: pip install anthropic yt-dlp youtube-transcript-api
+        run: pip install anthropic yt-dlp youtube-transcript-api curl-cffi
 
       - name: Run daily update
         env:

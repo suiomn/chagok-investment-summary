@@ -84,7 +84,9 @@ def _cookies_path() -> Path | None:
 
 def _ytdlp_base_args():
     """CI 환경(GitHub Actions)에서도 동작하도록 player client 및 쿠키 지정"""
-    args = [sys.executable, '-m', 'yt_dlp', '--extractor-args', 'youtube:player_client=android,ios,web']
+    args = [sys.executable, '-m', 'yt_dlp',
+            '--extractor-args', 'youtube:player_client=android,ios,web',
+            '--impersonate', 'chrome']
     cookies = _cookies_path()
     if cookies:
         args += ['--cookies', str(cookies)]
