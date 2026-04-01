@@ -83,10 +83,22 @@ def _cookies_path() -> Path | None:
 
 
 def _ytdlp_base_args():
-    """쿠키 기반 YouTube 자막 다운로드"""
-    args = [sys.executable, '-m', 'yt_dlp', '--impersonate', 'chrome']
+    """YouTube 자막 다운로드 - 브라우저 쿠키 우선, 파일 쿠키 폴백"""
+    args = [sys.executable, '-m', 'yt_dlp']
+    # 브라우저 쿠키 시도 (NHN 사용자로 실행 시 작동)
+    for browser in ['chrome', 'edge', 'firefox']:
+        test = subprocess.run(
+            [sys.executable, '-m', 'yt_dlp', f'--cookies-from-browser', browser, '--version'],
+            capture_output=True, timeout=10
+        )
+        if test.returncode == 0:
+            log(f"  브라우저 쿠키 사용: {browser}")
+            args += ['--cookies-from-browser', browser]
+            return args
+    # 파일 쿠키 폴백
     cookies = _cookies_path()
     if cookies:
+        log(f"  파일 쿠키 사용: {cookies}")
         args += ['--cookies', str(cookies)]
     return args
 
