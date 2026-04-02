@@ -70,7 +70,7 @@ def summarize_video(video_id: str, title: str, verbose: bool = True) -> dict | N
 
     try:
         response = client.messages.create(
-            model="claude-sonnet-4-6",
+            model="claude-sonnet-4-5",
             max_tokens=4096,
             messages=[{
                 "role": "user",
@@ -89,8 +89,7 @@ def summarize_video(video_id: str, title: str, verbose: bool = True) -> dict | N
             print(f"  [OK] {title[:50]}")
         return result
     except Exception as e:
-        if verbose:
-            print(f"  [ERROR] {video_id}: {e}")
+        print(f"  [ERROR] {video_id}: {e}")
         return None
 
 

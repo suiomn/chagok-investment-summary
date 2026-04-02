@@ -46,6 +46,7 @@ jobs:
 
       - name: Commit and push changes
         run: |
+          cd "$GITHUB_WORKSPACE"
           git config user.email "actions@github.com"
           git config user.name "GitHub Actions"
           git add index.html data/summaries.json data/channel_videos.json
