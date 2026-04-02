@@ -29,11 +29,19 @@ jobs:
       - name: Install dependencies
         run: pip install anthropic yt-dlp youtube-transcript-api curl-cffi
 
+      - name: Download subtitles (NHN user via Task Scheduler)
+        shell: powershell
+        run: |
+          schtasks /run /tn "YT_SubDownload"
+          Start-Sleep -Seconds 90
+          $status = Get-Content "C:\temp\subs_download_status.json" -ErrorAction SilentlyContinue
+          if ($status) { Write-Host "자막 다운로드 결과: $status" }
+          else { Write-Host "자막 결과 파일 없음 (계속 진행)" }
+
       - name: Run daily update
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: |
-          echo "${{ secrets.YOUTUBE_COOKIES }}" > "$RUNNER_TEMP/yt-cookies.txt"
           python src/daily_run_ci.py
 
       - name: Commit and push changes
